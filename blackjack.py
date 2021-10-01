@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Oct 16 21:41:36 2016
+created on sun oct 16 21:41:36 2016
 
-@author: Sashlin
+@author: sashlin
 """
 import numpy as np
 
-cards = { "Ace"   : 1,
+cards = { "ace"   : 1,
           "2"     : 2,
           "3"     : 3,
           "4"     : 4,
@@ -16,230 +16,230 @@ cards = { "Ace"   : 1,
           "8"     : 8,
           "9"     : 9,
           "10"    : 10,
-          "Jack"  : 10,
-          "Queen" : 10,
-          "King"  : 10 }
+          "jack"  : 10,
+          "queen" : 10,
+          "king"  : 10 }
           
-actions = { "Stay"  : 0,
-            "Hit"   : 1 }
+actions = { "stay"  : 0,
+            "hit"   : 1 }
 
-# A hand is represented as (faceValue, containsAce)
-def getEmptyHand():
+# a hand is represented as (face_value, contains_ace)
+def get_empty_hand():
     return (0, False)
 
 ###############################################################################   
    
-# Return whether or not a hand has a useable ace
-def hasUseableAce(hand):
-    faceValue, useableAce = hand
-    return ((useableAce) and ((faceValue + 10) <= 21))
+# return whether or not a hand has a useable ace
+def has_useable_ace(hand):
+    face_value, useable_ace = hand
+    return ((useable_ace) and ((face_value + 10) <= 21))
 
 ###############################################################################
     
-def getHandValue(hand):
-    faceValue = 0
-    faceValue, useableAce = hand
-    if hasUseableAce(hand):
-        faceValue = faceValue + 10
+def get_hand_value(hand):
+    face_value = 0
+    face_value, useable_ace = hand
+    if has_useable_ace(hand):
+        face_value = face_value + 10
     
-    return faceValue
+    return face_value
     
 ###############################################################################
 
-# Update the hand and its face value
-def addCardToHand(hand, card):
-    faceValue, useableAce = hand
-    faceValue = faceValue + card
-    # If the card we are adding is an ace
+# update the hand and its face value
+def add_card_to_hand(hand, card):
+    face_value, useable_ace = hand
+    face_value = face_value + card
+    # if the card we are adding is an ace
     if card == 1:
-        useableAce = True
+        useable_ace = True
         
-    return (faceValue, useableAce)
+    return (face_value, useable_ace)
     
 ###############################################################################
 
-# Returns random card's face value    
-def getRandomCard():    
+# returns random card's face value    
+def get_random_card():    
     card = np.random.choice(list(cards.keys()))
-    faceValue = list(cards.keys()).index(card)
-    return faceValue
+    face_value = list(cards.keys()).index(card)
+    return face_value
     
 ###############################################################################
 
-# Deal the players hand. Add a new card until we achieve a value greater than 11
-def dealPlayerHand():
-    hand = getEmptyHand()
-    hand = addCardToHand(hand, getRandomCard())
-    hand = addCardToHand(hand, getRandomCard())
-    while getHandValue(hand) < 11:
-        hand = addCardToHand(hand, getRandomCard())
+# deal the players hand. add a new card until we achieve a value greater than 11
+def deal_player_hand():
+    hand = get_empty_hand()
+    hand = add_card_to_hand(hand, get_random_card())
+    hand = add_card_to_hand(hand, get_random_card())
+    while get_hand_value(hand) < 11:
+        hand = add_card_to_hand(hand, get_random_card())
         
     return hand
 
 ###############################################################################    
 
-def dealInitialDealerHand():
-    hand = getEmptyHand()
-    hand = addCardToHand(hand, getRandomCard())
+def deal_initial_dealer_hand():
+    hand = get_empty_hand()
+    hand = add_card_to_hand(hand, get_random_card())
     return hand
 
 ###############################################################################
 
-def dealDealerHand(hand):
+def deal_dealer_hand(hand):
     
-    while getHandValue(hand) < 17:
-        hand = addCardToHand(hand, getRandomCard())
+    while get_hand_value(hand) < 17:
+        hand = add_card_to_hand(hand, get_random_card())
             
     return hand    
 
 ###############################################################################
 
 
-# States are tuples (card, val, useable) where
+# states are tuples (card, val, useable) where
 #  - card is the card the dealer is showing
 #  - val is the current value of the player's hand
 #  - useable is whether or not the player has a useable ace
 
-# Actions are either stay (False) or hit (True)
+# actions are either stay (False) or hit (True)
 
-# Select a state at random.
-def getRandomState(states):
+# select a state at random.
+def get_random_state(states):
    n = len(states)
-   randomIndex = np.random.randint(0,n-1)
-   state = states[randomIndex]
+   random_index = np.random.randint(0,n-1)
+   state = states[random_index]
    return state
       
 ###############################################################################
       
-def getInitialStates():
+def get_initial_states():
     states = []
-    for dealerVal in np.arange(1, 11):
-        for playerVal in np.arange(11, 21):
-            playerUseableAce = True
-            states.append((playerVal, dealerVal, playerUseableAce))
-            states.append((playerVal, dealerVal, not playerUseableAce))            
+    for dealer_val in np.arange(1, 11):
+        for player_val in np.arange(11, 21):
+            player_useable_ace = True
+            states.append((player_val, dealer_val, player_useable_ace))
+            states.append((player_val, dealer_val, not player_useable_ace))            
     return states
     
 ###############################################################################
 
-# A table of action values indexed by state and action. Initially zero
-def setUpQTable():
-    states = getInitialStates()
-    Q = {}
+# a table of action values indexed by state and action. initially zero
+def set_up_q_table():
+    states = get_initial_states()
+    q = {}
     for state in states:
-        Q[(state,actions['Stay'])] = 0.0
-        Q[(state,actions['Hit'])] = 0.0
-    return Q
+        q[(state,actions['stay'])] = 0.0
+        q[(state,actions['hit'])] = 0.0
+    return q
     
 ###############################################################################
 
-# Sets up a table of frequencies for state-action pairs. Initally zero    
-def setUpStateActionFrequencyTable():
-    NstateAction = setUpQTable()
-    return NstateAction
+# sets up a table of frequencies for state-action pairs. initally zero    
+def set_up_state_action_frequency_table():
+    nstate_action = set_up_q_table()
+    return nstate_action
 
 ###############################################################################
 
-# Given the state, return player and dealer hand consistent with it.
-def getPlayerAndDealerHandsFromState(state):
-   playerVal, dealerCard, useableAce = state
-   if (useableAce):
-      playerVal = playerVal - 10
-   playerHand = (playerVal, useableAce)
-   dealerHand = getEmptyHand()
-   dealerHand = addCardToHand(dealerHand, dealerCard)
-   return dealerCard, dealerHand, playerHand
+# given the state, return player and dealer hand consistent with it.
+def get_player_and_dealer_hands_from_state(state):
+   player_val, dealer_card, useable_ace = state
+   if (useable_ace):
+      player_val = player_val - 10
+   player_hand = (player_val, useable_ace)
+   dealer_hand = get_empty_hand()
+   dealer_hand = add_card_to_hand(dealer_hand, dealer_card)
+   return dealer_card, dealer_hand, player_hand
    
 ###############################################################################
     
-# Given the dealer's card and player's hand, return the state.
-def getStateFromDealerCardAndPlayerHand(dealerCard, playerHand):
-   playerVal = getHandValue(playerHand)
-   useableAce = hasUseableAce(playerHand)
-   return (playerVal, dealerCard, useableAce)
+# given the dealer's card and player's hand, return the state.
+def get_state_from_dealer_card_and_player_hand(dealer_card, player_hand):
+   player_val = get_hand_value(player_hand)
+   useable_ace = has_useable_ace(player_hand)
+   return (player_val, dealer_card, useable_ace)
    
 ###############################################################################
     
-def discountFunction(NstateAction):
-    return 1.0/NstateAction
+def discount_function(nstate_action):
+    return 1.0/nstate_action
     
 ###############################################################################
 
-def calculateReward(playerHand, dealerHand):
-    playerVal = getHandValue(playerHand)
-    dealerVal = getHandValue(dealerHand)
+def calculate_reward(player_hand, dealer_hand):
+    player_val = get_hand_value(player_hand)
+    dealer_val = get_hand_value(dealer_hand)
     
     reward = 0.0
-    # Check if player hand is better than dealer hand 
-    if playerVal > dealerVal:
+    # check if player hand is better than dealer hand 
+    if player_val > dealer_val:
         reward = 1.0
-    elif dealerVal > 21:
+    elif dealer_val > 21:
         reward = 1.0
-    elif playerVal < dealerVal:
+    elif player_val < dealer_val:
         reward = -1.0
-    # Else playerVal == dealerVal and the reward remains 0.0
+    # else player_val == dealer_val and the reward remains 0.0
         
     return reward
     
 ###############################################################################
 
-def qMax(Q, state):
-    maxQVal = -1.0
-    if Q[(state, actions['Hit'])] > Q[(state, actions['Stay'])]:
-        maxQVal = Q[(state, actions['Hit'])]
+def q_max(q, state):
+    max_q_val = -1.0
+    if q[(state, actions['hit'])] > q[(state, actions['stay'])]:
+        max_q_val = q[(state, actions['hit'])]
     else:
-        maxQVal = Q[(state, actions['Stay'])]
+        max_q_val = q[(state, actions['stay'])]
         
-    return maxQVal
+    return max_q_val
 
 ###############################################################################
     
-def getGLIEpolicy(Q, state, epsilon):
+def get_gli_epolicy(q, state, epsilon):
     rand = np.random.random()
     if rand < epsilon:
-        return getRandomAction()
+        return get_random_action()
     else:
-        return getBestAction(Q, state)
+        return get_best_action(q, state)
         
 ###############################################################################
         
-def getRandomAction():
+def get_random_action():
     # print(actions.keys())
-    actionKey = np.random.choice(list(actions.keys()))
-    return actionKey
+    action_key = np.random.choice(list(actions.keys()))
+    return action_key
     
 ###############################################################################
     
-def getBestAction(Q, state):
-    if Q[state, actions['Hit'] > Q[state, actions['Stay']]]:
-        return 'Hit'
+def get_best_action(q, state):
+    if q[state, actions['hit'] > q[state, actions['stay']]]:
+        return 'hit'
     else:
-        return 'Stay'
+        return 'stay'
         
 ###############################################################################
         
-def explorationFunction(Q, state, NstateAction, Nepsilon):
-    if NstateAction < Nepsilon:
-        return getBestAction(Q, state)
+def exploration_function(q, state, nstate_action, nepsilon):
+    if nstate_action < nepsilon:
+        return get_best_action(q, state)
     else:
-        return getRandomAction()
+        return get_random_action()
     
 ###############################################################################
     
-def printPolicy(Q):
+def print_policy(q):
     
     print('\n---- Policy ----\n')
     for useable in [True, False]:  
         if useable:
-            print('Soft Totals (Useable ace)')
+            print('Soft totals (useable ace)')
         else:
-            print('Hard Totals (No useable ace)')
+            print('Hard totals (no useable ace)')
         for i in np.arange(1, 11):
             print(i),
         print('\n')
         for val in np.arange(11,21):
             for card in np.arange(1,11):
-                if (Q[((val,card,useable),actions['Hit'])] > Q[((val,card,useable),actions['Stay'])]):
+                if (q[((val,card,useable),actions['hit'])] > q[((val,card,useable),actions['stay'])]):
                     print( 'H', end=',')
                 else:
                     print( 'S', end=',')
@@ -248,93 +248,93 @@ def printPolicy(Q):
             
 ##############################################################################
 
-def runQLearning():
+def run_q_learning():
     delta = 1
     diff = 1e-6
     iteration = 1
     discount = 0.9
     
-    # Setup Q table -> initially all zero
-    Q = setUpQTable()
-    # Setup state action freq table -> initially zero
-    NstateAction = setUpStateActionFrequencyTable()
-    # Setup states
-    states = getInitialStates()
+    # setup q table -> initially all zero
+    q = set_up_q_table()
+    # setup state action freq table -> initially zero
+    nstate_action = set_up_state_action_frequency_table()
+    # setup states
+    states = get_initial_states()
     
     while iteration < 100000:
-        global Q_copy
-        Q_copy = Q.copy()
+        global q_copy
+        q_copy = q.copy()
         
         restart = False
         # get random state to start from 
-        state = getRandomState(states)
+        state = get_random_state(states)
         
-        dealerCard, dealerHand, playerHand = getPlayerAndDealerHandsFromState(state)
+        dealer_card, dealer_hand, player_hand = get_player_and_dealer_hands_from_state(state)
         
         while not restart:
             
-            # Choose random action from the dictionary
-            # actionKey = np.random.choice(actions.keys())
-            actionKey = getGLIEpolicy(Q, state, 0.7)
-            # actionKey = explorationFunction(Q, state, NstateAction[state, ])
-            action = actions[actionKey]
+            # choose random action from the dictionary
+            # action_key = np.random.choice(actions.keys())
+            action_key = get_gli_epolicy(q, state, 0.7)
+            # action_key = exploration_function(q, state, nstate_action[state, ])
+            action = actions[action_key]
 
-            # If the action is hit then we add a random card to the players hand            
-            if actionKey == 'Hit':
-                playerHand = addCardToHand(playerHand, getRandomCard())
+            # if the action is hit then we add a random card to the players hand            
+            if action_key == 'hit':
+                player_hand = add_card_to_hand(player_hand, get_random_card())
                 
-                # Check if player has busted
-                if getHandValue(playerHand) > 21:
-                    # Increment state-action pair in freq table
-                    NstateAction[(state, action)] = NstateAction[(state, action)] + 1.0
-                    # Update Q-table
-                    Q[state, action] = Q[state, action] + discountFunction(NstateAction[(state, action)]) \
-                                       *((-1.0) + 0.0 - Q[state, action])
+                # check if player has busted
+                if get_hand_value(player_hand) > 21:
+                    # increment state-action pair in freq table
+                    nstate_action[(state, action)] = nstate_action[(state, action)] + 1.0
+                    # update q-table
+                    q[state, action] = q[state, action] + discount_function(nstate_action[(state, action)]) \
+                                       *((-1.0) + 0.0 - q[state, action])
                     restart = True
                     print('Busted')
                     break
-                elif getHandValue(playerHand) == 21:
-                    # Increment state-action pair in freq table
-                    NstateAction[(state, action)] = NstateAction[(state, action)] + 1.0
-                    # Update Q-table
-                    Q[state, action] = Q[state, action] + discountFunction(NstateAction[(state, action)]) \
-                                       *((1.0) + 0.0 - Q[state, action])
+                elif get_hand_value(player_hand) == 21:
+                    # increment state-action pair in freq table
+                    nstate_action[(state, action)] = nstate_action[(state, action)] + 1.0
+                    # update q-table
+                    q[state, action] = q[state, action] + discount_function(nstate_action[(state, action)]) \
+                                       *((1.0) + 0.0 - q[state, action])
                     restart = True
                     print('Yay')
                     break
                 else:
-                    # Increment state-action pair in freq table
-                    NstateAction[(state, action)] = NstateAction[(state, action)] + 1.0
-                    # Find qMax for the next state
-                    nextState = getStateFromDealerCardAndPlayerHand(dealerCard, playerHand)
-                    qMaxVal = qMax(Q, nextState)
-                    # Update Q-table
-                    Q[state, action] = Q[state, action] + discountFunction(NstateAction[(state, action)]) \
-                                       *(0.0 + discount * qMaxVal - Q[state, action])
-                    # Update state
-                    state = nextState
-                    print('Next State')
+                    # increment state-action pair in freq table
+                    nstate_action[(state, action)] = nstate_action[(state, action)] + 1.0
+                    # find q_max for the next state
+                    next_state = get_state_from_dealer_card_and_player_hand(dealer_card, player_hand)
+                    q_max_val = q_max(q, next_state)
+                    # update q-table
+                    q[state, action] = q[state, action] + discount_function(nstate_action[(state, action)]) \
+                                       *(0.0 + discount * q_max_val - q[state, action])
+                    # update state
+                    state = next_state
+                    print('Next state')
                     
-            # Allow the dealer to play
+            # allow the dealer to play
             else:
-                dealerHand = dealDealerHand(dealerHand)
-                # Calculate immediate reward
-                reward = calculateReward(playerHand, dealerHand)
-                # Increment state-action pair in freq table
-                NstateAction[(state, action)] = NstateAction[(state, action)] + 1.0
-                # Update Q-table
-                # qMax will be zero because this will be the terminal state
-                Q[state, action] = Q[state, action] + discountFunction(NstateAction[(state, action)]) \
-                                       *(reward + 0.0 - Q[state, action])
+                dealer_hand = deal_dealer_hand(dealer_hand)
+                # calculate immediate reward
+                reward = calculate_reward(player_hand, dealer_hand)
+                # increment state-action pair in freq table
+                nstate_action[(state, action)] = nstate_action[(state, action)] + 1.0
+                # update q-table
+                # q_max will be zero because this will be the terminal state
+                q[state, action] = q[state, action] + discount_function(nstate_action[(state, action)]) \
+                                       *(reward + 0.0 - q[state, action])
                 restart = True
                 break
                 
-        delta = np.max( np.abs( np.array(sorted(Q.values()))-np.array(sorted(Q_copy.values())) ) )
+        delta = np.max( np.abs( np.array(sorted(q.values()))-np.array(sorted(q_copy.values())) ) )
         print( 'iteration = ' + str(iteration) + ', ' + 'delta = ' + '%7.4f'%(delta) )
         iteration = iteration + 1
         
-    return Q
+    return q
 
-Q = runQLearning()
+q = run_q_learning()
                 
-printPolicy(Q)
+print_policy(q)
